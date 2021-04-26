@@ -1,11 +1,16 @@
 pipeline {
 	agent any
 	//agent { docker { image 'maven:3.6.3' } }
-
+	environment{
+		dockerHome= tool 'myDocker'
+		mavenHome= tool 'myMaven'
+		PATH= '$dockerHome/bin:$mavenHome/bin:$PATH'
+	}
 	stages{
 		stage('Build') {
 			steps{
-				//sh "mvn --version"
+				sh "mvn --version"
+				sh "docker version"
 				echo "Build"
 				echo "Build no. - $env.BUILD_NUMBER"
 				echo "Build id - $env.BUILD_ID"
@@ -17,13 +22,19 @@ pipeline {
 		}
 		stage('Test') {
 			steps{
-				echo "Test"
+				sh "mvn test"
+			}
+		}
+		stage('Integration Test') {
+			steps{
+				echo "Integration test"
+				sh "mvn test"
 			}
 		}
 	}
 	post{
 		always{
-			echo 'I will allways run'
+			echo 'I will always run'
 		}
 		failure{
 			echo 'I run when you fail'
